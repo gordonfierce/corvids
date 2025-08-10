@@ -1,0 +1,4 @@
+diophantine
+sympy
+numpy
+matplotlib
