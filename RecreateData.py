@@ -59,7 +59,7 @@ def multiprocessGetSolutionSpace(min_score, max_score, num_samples, mean_and_var
                             None if no solution exists
     '''
     if not poss_vals:
-        poss_vals = xrange(min_score, max_score+1)
+        poss_vals = range(min_score, max_score+1)
 
     mean, variance = mean_and_variance
     param_tuple = (mean, variance)
@@ -89,7 +89,7 @@ def multiprocessGetSolutionSpace(min_score, max_score, num_samples, mean_and_var
                 mean -= val
                 num_samples -= 1
         elif isinstance(check_val, dict):
-            for val, num in check_val.iteritems():
+            for val, num in check_val.items():
                 variance -= num*(num_samples*val - mean)**2
                 mean -= val*num
                 num_samples -= num
@@ -102,7 +102,7 @@ def multiprocessGetSolutionSpace(min_score, max_score, num_samples, mean_and_var
         base_vec = basis[-1,:]
         basis = basis[:-1,:]
         if debug:
-            print "found potential at: " + str(mean_and_variance)
+            print("found potential at: " + str(mean_and_variance))
         return base_vec, basis, A, b, param_tuple
     except IndexError:
         return None
@@ -146,7 +146,7 @@ class RecreateData:
             items = list(set(new_sol))
             items.sort()
             if correction == 1:
-                candidates = [item for item, count in collections.Counter(new_sol).items() if count > 1 and (item + 1) in self.poss_vals and (item - 1) in self.poss_vals]
+                candidates = [item for item, count in list(collections.Counter(new_sol).items()) if count > 1 and (item + 1) in self.poss_vals and (item - 1) in self.poss_vals]
                 if len(candidates)==0:
                     # print "None1 was encountered ", num_adjustments
                     return None
@@ -168,7 +168,7 @@ class RecreateData:
             items.sort()
             for val_1, val_2 in itertools.combinations(items, 2):
                 #since we sorted items, val_1 is the smaller one
-                for size in xrange(1, min((max(self.poss_vals) - val_2), val_1 - min(self.poss_vals))):
+                for size in range(1, min((max(self.poss_vals) - val_2), val_1 - min(self.poss_vals))):
                     if val_1 - size not in self.poss_vals or val_2 + size not in self.poss_vals:
                         continue
                     adjustment = (math.fabs(val_1 - val_2)*size + size**2)
@@ -207,7 +207,7 @@ class RecreateData:
     def validMeansVariances(self, findFirst):
         solutions = defaultdict(list)
         means_list = []
-        for i in xrange(int(math.ceil((self.mean - self.mean_precision)*self.num_samples)),
+        for i in range(int(math.ceil((self.mean - self.mean_precision)*self.num_samples)),
                         int(math.floor((self.mean + self.mean_precision)*self.num_samples))+1):
             means_list.append(float(i)/self.num_samples)
         mean_variances = []
@@ -235,22 +235,22 @@ class RecreateData:
             if len(solutions) > 0:
                 self.simpleData.update(solutions)
                 if self.debug:
-                    print str(sum([len(x) for x in self.simpleData.itervalues()])) + " unique solutions found simulatenously (not neccessarily complete!!)."
+                    print(str(sum([len(x) for x in self.simpleData.values()])) + " unique solutions found simulatenously (not neccessarily complete!!).")
                     index = 0
                     for params in self.simpleData:
                         if index > 100:
                             break
-                        print "At mean, variance", params, ":"
+                        print("At mean, variance", params, ":")
                         for simpleSol in self.simpleData[params]:
                             if index > 100:
                                 break
                             index += 1
-                            print simpleSol
+                            print(simpleSol)
 
-                print "Done."
+                print("Done.")
                 return
         if self.debug:
-            print "Total potential mean/variance pairs to consider: " + str(len(mean_variances))
+            print("Total potential mean/variance pairs to consider: " + str(len(mean_variances)))
         return mean_variances
 
 
@@ -276,7 +276,7 @@ class RecreateData:
         variance = self.variance
 
         if not poss_vals:
-            poss_vals = xrange(self.absolute_min, self.absolute_max+1)
+            poss_vals = range(self.absolute_min, self.absolute_max+1)
         else:
             self.min_score = min(poss_vals)
             self.max_score = max(poss_vals)
@@ -306,7 +306,7 @@ class RecreateData:
                     mean -= val
                     self.num_samples -= 1
             elif isinstance(check_val, dict):
-                for val, num in check_val.iteritems():
+                for val, num in check_val.items():
                     variance -= num*(self.num_samples*val - mean)**2
                     mean -= val*num
                     self.num_samples -= num
@@ -323,7 +323,7 @@ class RecreateData:
             return base_vec, basis, A, b
         except IndexError:
             if self.debug:
-                print "No solutions exist (postive or otherwise)"
+                print("No solutions exist (postive or otherwise)")
             return None
 
 
@@ -332,7 +332,7 @@ class RecreateData:
         variances_list = [self.variance]
 
         if not poss_vals:
-            poss_vals = range(self.absolute_min, self.absolute_max+1)
+            poss_vals = list(range(self.absolute_min, self.absolute_max+1))
         else:
             self.min_score = min(poss_vals)
             self.max_score = max(poss_vals)
@@ -352,7 +352,7 @@ class RecreateData:
 
     def _recreateData_piece_2(self, mean_variance_pairs, check_val=None, poss_vals=None, multiprocess=True, find_first=False):
         if self.debug:
-            print "Checking for potential solution spaces."
+            print("Checking for potential solution spaces.")
         if multiprocess:
             pool = mp.Pool()
             func = functools.partial(multiprocessGetSolutionSpace,self.min_score, self.max_score, self.num_samples,
@@ -459,7 +459,7 @@ class RecreateData:
                                     poss_vals.append(val)
                                     # temp_sol[poss_vals.index(val)]=1
                         elif isinstance(check_val, dict):
-                            for val, num in check_val.iteritems():
+                            for val, num in check_val.items():
                                 try:
                                     temp_sol[poss_vals.index(val)]+=1
                                 except ValueError:
@@ -475,8 +475,8 @@ class RecreateData:
             init_bases.append(basis)
             param_tuples.append(param_tuple)
         if self.debug:
-            print "Found " + str(len(param_tuples) + len(self.sols)) + " potentially viable mean/variance pairs." #Get Katherine to UPDATE this!
-            print "Manipulating Bases and Initial Vectors for Complete Search Guarantee"
+            print("Found " + str(len(param_tuples) + len(self.sols)) + " potentially viable mean/variance pairs.") #Get Katherine to UPDATE this!
+            print("Manipulating Bases and Initial Vectors for Complete Search Guarantee")
         return init_bases, init_base_vecs, param_tuples
 
     def _findAll_piece_2_multi_proc(self, init_bases, init_base_vecs, param_tuples, check_val=None, poss_vals=None, multiprocess=True, find_first=False):
@@ -488,7 +488,7 @@ class RecreateData:
 
         for basis_and_init, param_tuple in zip(bases_and_inits, param_tuples):
             if self.debug:
-                print "Checking for solutions at: " + str(param_tuple)
+                print("Checking for solutions at: " + str(param_tuple))
             manip_base_vec = basis_and_init[1]
             manip_basis = basis_and_init[0]
             # print manip_base_vec
@@ -520,7 +520,7 @@ class RecreateData:
                                 poss_vals.append(val)
                                 temp_sols[-1][poss_vals.index(val)]=1
                     elif isinstance(check_val, dict):
-                        for val, num in check_val.iteritems():
+                        for val, num in check_val.items():
                             try:
                                 temp_sols[-1][poss_vals.index(val)]+=1
                             except ValueError:
@@ -533,10 +533,10 @@ class RecreateData:
             self.sols[param_tuple] = temp_sols
 
         if self.debug:
-            print "Done."
+            print("Done.")
         temp_sols =self.sols
         self.sols = {}
-        for key, value in temp_sols.iteritems():
+        for key, value in temp_sols.items():
             if len(value)>0:
                 self.sols[key] = value
         self.extended_poss_vals = poss_vals
@@ -576,7 +576,7 @@ class RecreateData:
                                         poss_vals.append(val)
                                         # temp_sol[poss_vals.index(val)]=1
                             elif isinstance(check_val, dict):
-                                for val, num in check_val.iteritems():
+                                for val, num in check_val.items():
                                     try:
                                         temp_sol[poss_vals.index(val)]+=1
                                     except ValueError:
@@ -591,7 +591,7 @@ class RecreateData:
                 init_base_vecs.append(base_vec)
                 init_bases.append(basis)
             pool = mp.Pool()
-            bases_and_inits = pool.map(multiprocessGetManipBases, zip(init_bases, init_base_vecs))
+            bases_and_inits = pool.map(multiprocessGetManipBases, list(zip(init_bases, init_base_vecs)))
             for basis_and_init in bases_and_inits:
                 base_vecs.append(basis_and_init[1])
                 bases.append(basis_and_init[0])
@@ -624,7 +624,7 @@ class RecreateData:
                                         poss_vals.append(val)
                                         # temp_sol[poss_vals.index(val)]=1
                             elif isinstance(check_val, dict):
-                                for val, num in check_val.iteritems():
+                                for val, num in check_val.items():
                                     try:
                                         temp_sol[poss_vals.index(val)]+=1
                                     except ValueError:
@@ -670,7 +670,7 @@ class RecreateData:
                         poss_vals.append(val)
                         # temp_sol[poss_vals.index(val)]=1
             elif isinstance(check_val, dict):
-                for val, num in check_val.iteritems():
+                for val, num in check_val.items():
                     try:
                         sol[poss_vals.index(val)]+=1
                     except ValueError:
@@ -682,7 +682,7 @@ class RecreateData:
 
         self.sols = {'_':[sol]}
         if self.debug:
-            print "Done."
+            print("Done.")
         self.extended_poss_vals = poss_vals
         return self.sols
 
@@ -1083,11 +1083,11 @@ class RecreateData:
 
         if not self.sols:
             if self.debug:
-                print "No solutions to run analysis over.  NB: recreateData() must be run before analyzeSkew()"
+                print("No solutions to run analysis over.  NB: recreateData() must be run before analyzeSkew()")
             raise ValueError
 
         skews = []
-        for sol_set in self.sols.values():
+        for sol_set in list(self.sols.values()):
             for dist in sol_set:
                 sol = []
                 for i, x in enumerate(dist):
@@ -1105,11 +1105,11 @@ class RecreateData:
         if not self.sols:
             if not self.simpleData:
                 if self.debug:
-                    print "No solutions to run analysis over.  NB: graphData() must be run before analyzeSkew()"
+                    print("No solutions to run analysis over.  NB: graphData() must be run before analyzeSkew()")
                 raise ValueError
             sols = []
             all_sols = []
-            for sol_set in self.simpleData.values():
+            for sol_set in list(self.simpleData.values()):
                 for sol in sol_set:
                     all_sols.append(sol)
             if max_samples == -1:
@@ -1139,7 +1139,7 @@ class RecreateData:
         else:
             sols = []
             all_sols = []
-            for sol_set in self.sols.values():
+            for sol_set in list(self.sols.values()):
                 all_sols.extend(sol_set)
             if max_samples == -1:
                 sols = all_sols
@@ -1178,9 +1178,9 @@ class RecreateData:
             return self.simpleData
         if not self.sols:
             if self.debug:
-                print "No solutions to run analysis over.  NB: graphData() must be run before analyzeSkew()"
+                print("No solutions to run analysis over.  NB: graphData() must be run before analyzeSkew()")
             raise ValueError
-        for param, sol_list in self.sols.iteritems():
+        for param, sol_list in self.sols.items():
             for sol in sol_list:
                 simple_sol = []
                 poss_vals = self.poss_vals
@@ -1218,7 +1218,7 @@ if __name__ == "__main__":
 
     RD = RecreateData(1,7,10,3,4, mean_precision=0.5, variance_precision=0.5)#(min_score, max_score, num_samples, mean, variance, mean_precision=0.0, variance_precision=0.0)
     RD.recreateData(multiprocess=True, find_first=False)
-    print RD.getDataSimple()
+    print(RD.getDataSimple())
 
     # for sol_set in RD.sols.values():
     #     for sol in sol_set:

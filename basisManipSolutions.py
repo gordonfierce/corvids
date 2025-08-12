@@ -5,6 +5,7 @@ basisManipSolutions.py is a collection of funcion calls
 import fractions
 from collections import  defaultdict
 from diophantine import *
+from functools import reduce
 
 # Extend lcm and gcd to cover using lists of integers instead of just pairs of integers
 lcm = lambda a: reduce(lambda x,y: abs(x*y)/fractions.gcd(x,y) if x*y > 0 else max(abs(x), abs(y)), a)
@@ -13,19 +14,19 @@ gcd = lambda a: reduce(lambda x,y: abs(fractions.gcd(x,y)), a)
 # Perform vector addition and scalar-vector multiplication
 #   (could also re-write code to use numpy arrays which natively support this)
 def list_sum(a,b):
-    return map(lambda (x,y): x+y, zip(a,b))
+    return [x_y[0]+x_y[1] for x_y in zip(a,b)]
 def list_mul(a,c):
-    return map(lambda (a):a*c, a)
+    return [a*c for a in a]
 
 def getMinimal(a):
-    temp_a = map(soft_round, list_mul(a, 1.0/gcd(a)))
+    temp_a = list(map(soft_round, list_mul(a, 1.0/gcd(a))))
     scale_val = 1
     temp_a.reverse()
     for val in temp_a:
         if val != 0:
             scale_val = val
             break
-    temp_a = map(soft_round, list_mul(temp_a, 1.0/scale_val))
+    temp_a = list(map(soft_round, list_mul(temp_a, 1.0/scale_val)))
     temp_a.reverse()
     return temp_a
 
@@ -42,15 +43,15 @@ def findManips(a):
     to_clean = defaultdict(list)
     while True:
         # Create transpose of 'a'
-        c = zip(*a)
+        c = list(zip(*a))
 
         for b_indx, c_ in enumerate(c):
-            for a_indx in xrange(len(c_)):
+            for a_indx in range(len(c_)):
                 # None of this works if
                 if c_[a_indx] != 0:
                     # If a_indx hasn't been covered yet, it needs to be
                     if a_indx in allowable:
-                        if not order.has_key(b_indx):
+                        if b_indx not in order:
                             order[b_indx] = a_indx
                             allowable.remove(a_indx)
                             continue
@@ -79,7 +80,7 @@ def useXtoFixY(X,Y, index):
 
 def fixSols(a, order, to_fix):
     while len(to_fix)>0:
-        for b_indx, a_indices in to_fix.iteritems():
+        for b_indx, a_indices in to_fix.items():
             for a_index in a_indices:
                 a[a_index] = useXtoFixY(a[order[b_indx]], a[a_index], b_indx)
                 # print "made a change"
@@ -90,7 +91,7 @@ def fixSols(a, order, to_fix):
 
 def cleanSols(a, order, to_clean):
     while len(to_clean)>0:
-        for b_indx, a_indices in to_clean.iteritems():
+        for b_indx, a_indices in to_clean.items():
             if b_indx > max(order):
                 continue
             for a_index in a_indices:
@@ -108,7 +109,7 @@ def cleanSols(a, order, to_clean):
 def getManipBasis(a,b):
     assert isinstance(a, Matrix)
     assert isinstance(b, Matrix)
-    a = [a._mat[i:i+a.shape[1]] for i in xrange(0, len(a._mat), a.shape[1])]
+    a = [a._mat[i:i+a.shape[1]] for i in range(0, len(a._mat), a.shape[1])]
     b = b._mat
     # b = [b_[0] for b_ in b]
     a = [a_ for a_ in a if a_.reverse()==None]
@@ -137,7 +138,7 @@ def getManipBasis(a,b):
     # print order
     # print to_fix
     # print to_clean
-    for b_index, a_index in order.iteritems():
+    for b_index, a_index in order.items():
         if a[a_index][b_index] < 0:
             a[a_index] = list_mul(a[a_index], -1)
     a = [[soft_round(a__) for a__ in a_] for a_ in a if a_.reverse()==None]
@@ -166,5 +167,5 @@ if __name__ == "__main__":
     # b = Matrix([[120], [63], [18], [-20], [-48], [-67], [-77], [-78], [-70], [-52], [-26], [9], [56], [109], [172]])
 
     a,b = getManipBasis(a,b)
-    print a
-    print b
+    print(a)
+    print(b)
