@@ -12,6 +12,7 @@ integer overflow errors despite using int64 representations.
 Diophantine is released under the MIT Licence (see Licence for details)
 Author: Thomas G. Close (tom.g.close@gmail.com)
 """
+
 # The MIT License (MIT)
 #
 # Copyright (c) 2015 Thomas G. Close
@@ -34,8 +35,7 @@ Author: Thomas G. Close (tom.g.close@gmail.com)
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 from copy import deepcopy
-from math import copysign, sqrt, log10, floor
-from fractions import gcd
+from math import copysign, sqrt, floor, gcd
 from sympy import Matrix, zeros, ones, eye
 from itertools import chain, product
 
@@ -45,16 +45,16 @@ class NoSolutionException(Exception):
 
 
 class Diophantine:
-
     # Sign of a variable, which isn't included in math for some reason
     def sign(self, x):
         return copysign(1, x) if x else 0
 
-
     def nonzero(self, m):
-        return [(i, j) for i, j in product(xrange(m.shape[0]), xrange(m.shape[1]))
-                if m[i, j] != 0]
-
+        return [
+            (i, j)
+            for i, j in product(range(m.shape[0]), range(m.shape[1]))
+            if m[i, j] != 0
+        ]
 
     def solve(self, A, b):
         """
@@ -83,8 +83,10 @@ class Diophantine:
         A = Matrix(A)
         b = Matrix(b)
         if b.shape != (A.shape[0], 1):
-            raise Exception("Length of b vector ({}) does not match number of rows"
-                            " in A matrix ({})".format(b.shape[0], A.shape[0]))
+            raise Exception(
+                "Length of b vector ({}) does not match number of rows"
+                " in A matrix ({})".format(b.shape[0], A.shape[0])
+            )
         G = zeros(A.shape[1] + 1, A.shape[0] + 1)
         G[:-1, :-1] = A.T
         G[-1, :-1] = b.reshape(1, b.shape[0])
@@ -108,8 +110,10 @@ class Diophantine:
         A = Matrix(A)
         b = Matrix(b)
         if b.shape != (A.shape[0], 1):
-            raise Exception("Length of b vector ({}) does not match number of rows"
-                            " in A matrix ({})".format(b.shape[0], A.shape[0]))
+            raise Exception(
+                "Length of b vector ({}) does not match number of rows"
+                " in A matrix ({})".format(b.shape[0], A.shape[0])
+            )
         G = zeros(A.shape[1] + 1, A.shape[0] + 1)
         G[:-1, :-1] = A.T
         G[-1, :-1] = b.reshape(1, b.shape[0])
@@ -146,36 +150,36 @@ class Diophantine:
         k = 1
         while k < m:
             col1, col2 = self.reduce_matrix(A, B, L, k, k - 1, D)
-            u = n1 * (int(D[k - 1]) * int(D[k + 1]) +
-                      int(L[k, k - 1]) * int(L[k, k - 1]))
+            u = n1 * (
+                int(D[k - 1]) * int(D[k + 1]) + int(L[k, k - 1]) * int(L[k, k - 1])
+            )
             v = m1 * int(D[k]) * int(D[k])
             if col1 <= min(col2, n - 1) or (col1 == n and col2 == n and u < v):
                 self.swap_rows(k, A, B, L, D)
                 if k > 1:
                     k = k - 1
             else:
-                for i in reversed(xrange(k - 1)):
+                for i in reversed(range(k - 1)):
                     self.reduce_matrix(A, B, L, k, i, D)
                 k = k + 1
         try:
-            rank = A.shape[0] - next(i for i in xrange(A.shape[0])
-                                     if self.nonzero(A[i, :]))
+            rank = A.shape[0] - next(
+                i for i in range(A.shape[0]) if self.nonzero(A[i, :])
+            )
         except StopIteration:
             assert False, "A matrix contains only zeros"
         hnf = A[::-1, :]
         unimodular_matrix = B[::-1, :]
         return hnf, unimodular_matrix, rank
 
-
     def initialise_working_matrices(self, G):
-        """  G is a nonzero matrix with at least two rows.  """
+        """G is a nonzero matrix with at least two rows."""
         B = eye(G.shape[0])
         # Lower triang matrix
         L = zeros(G.shape[0], G.shape[0])
         D = ones(G.shape[0] + 1, 1)
         A = Matrix(G)
         return A, B, L, D
-
 
     def first_nonzero_is_negative(self, A):
         """
@@ -184,7 +188,7 @@ class Diophantine:
         if the first nonzero column j of A contains only one nonzero entry, which
         is negative+ This assumes A is a nonzero matrix with at least two rows+
         """
-        nonzero_columns = zip(*self.nonzero(A))[1]  # Should always be nonzero
+        nonzero_columns = list(zip(*self.nonzero(A)))[1]  # Should always be nonzero
         # Get the first nonzero column
         nonzero_col = A[:, min(nonzero_columns)]
         # Get the nonzero elements
@@ -192,9 +196,8 @@ class Diophantine:
         # If there is only one and it is negative return 1 else 0
         return len(nonzero_elems) == 1 and nonzero_elems[0] < 0
 
-
     def reduce_matrix(self, A, B, L, k, i, D):
-        nonzero_i_elems = zip(*self.nonzero(A[i, :]))
+        nonzero_i_elems = list(zip(*self.nonzero(A[i, :])))
         if len(nonzero_i_elems):
             col1 = nonzero_i_elems[1][0]
             if A[i, col1] < 0:
@@ -203,7 +206,7 @@ class Diophantine:
                 B[i, :] *= -1
         else:
             col1 = A.shape[1]
-        nonzero_k_elems = zip(*self.nonzero(A[k, :]))
+        nonzero_k_elems = list(zip(*self.nonzero(A[k, :])))
         if len(nonzero_k_elems):
             col2 = nonzero_k_elems[1][0]
         else:
@@ -224,28 +227,25 @@ class Diophantine:
             L[k, :i] -= q * L[i, :i]
         return col1, col2
 
-
     def minus(self, j, L):
         L[j, :] = -L[j, :]
         L[:, j] = -L[:, j]
-
 
     def swap_rows(self, k, A, B, L, D):
         # To avoid the interpretation of -1 as the last index of the matrix create
         # a reverse stop that ends past the negative of the length of the matrix
         reverse_stop = k - 2 if k > 1 else -(A.shape[0] + 1)
         # Swap rows of the matrices
-        A[(k - 1):(k + 1), :] = A[k:reverse_stop:-1, :]
-        B[(k - 1):(k + 1), :] = B[k:reverse_stop:-1, :]
-        L[(k - 1):(k + 1), :(k - 1)] = L[k:reverse_stop:-1, :(k - 1)]
-        t = (L[(k + 1):, k - 1] * D[k + 1] / D[k] -
-             L[(k + 1):, k] * L[k, k - 1] / D[k])
-        L[(k + 1):, k - 1] = (L[(k + 1):, k - 1] * L[k, k - 1] +
-                              L[(k + 1):, k] * D[k - 1]) / D[k]
-        L[(k + 1):, k] = t
+        A[(k - 1) : (k + 1), :] = A[k:reverse_stop:-1, :]
+        B[(k - 1) : (k + 1), :] = B[k:reverse_stop:-1, :]
+        L[(k - 1) : (k + 1), : (k - 1)] = L[k:reverse_stop:-1, : (k - 1)]
+        t = L[(k + 1) :, k - 1] * D[k + 1] / D[k] - L[(k + 1) :, k] * L[k, k - 1] / D[k]
+        L[(k + 1) :, k - 1] = (
+            L[(k + 1) :, k - 1] * L[k, k - 1] + L[(k + 1) :, k] * D[k - 1]
+        ) / D[k]
+        L[(k + 1) :, k] = t
         t = int(D[k - 1]) * int(D[k + 1]) + int(L[k, k - 1]) * int(L[k, k - 1])
         D[k] = t / D[k]
-
 
     def get_solutions(self, A):
         m = A.shape[0]
@@ -258,7 +258,7 @@ class Diophantine:
         Nd = Qd[:m, m]
         Cn = 0
         Cd = 1
-        for i in xrange(m):
+        for i in range(m):
             num, den = self.multr(Nn[i], Nd[i], Nn[i], Nd[i])
             num, den = self.multr(num, den, Qn[i, i], Qd[i, i])
             Cn, Cd = self.addr(Cn, Cd, num, den)
@@ -293,11 +293,12 @@ class Diophantine:
                     else:
                         # now update U
                         Un[i - 1], Ud[i - 1] = 0, 1
-                        for j in xrange(i, m):
+                        for j in range(i, m):
                             # Loops from back of xs
                             num, den = self.multr(Qn[i - 1, j], Qd[i - 1, j], x[j], 1)
-                            Un[i - 1], Ud[i - 1] = self.addr(Un[i - 1], Ud[i - 1], num,
-                                                        den)
+                            Un[i - 1], Ud[i - 1] = self.addr(
+                                Un[i - 1], Ud[i - 1], num, den
+                            )
                         # now update T
                         num, den = self.addr(x[i], 1, Un[i], Ud[i])
                         num, den = self.subr(num, den, Nn[i], Nd[i])
@@ -311,7 +312,6 @@ class Diophantine:
                     if i == m:
                         return solutions
 
-
     def cholesky(self, A):
         """
         # A is positive definite mxm
@@ -321,18 +321,17 @@ class Diophantine:
         m = A.shape[0]
         N = deepcopy(A)
         D = ones(*A.shape)
-        for i in xrange(m - 1):
-            for j in xrange(i + 1, m):
+        for i in range(m - 1):
+            for j in range(i + 1, m):
                 N[j, i] = N[i, j]
                 D[j, i] = D[i, j]
                 n, d = self.ratior(N[i, j], D[i, j], N[i, i], D[i, i])
                 N[i, j], D[i, j] = n, d
-            for k in xrange(i + 1, m):
-                for l in xrange(k, m):
+            for k in range(i + 1, m):
+                for l in range(k, m):
                     n, d = self.multr(N[k, i], D[k, i], N[i, l], D[i, l])
                     N[k, l], D[k, l] = self.subr(N[k, l], D[k, l], n, d)
         return N, D
-
 
     def gram(self, A):
         """
@@ -340,11 +339,10 @@ class Diophantine:
         """
         m = A.shape[0]
         B = zeros(m, m)
-        for i in xrange(m):
-            for j in xrange(m):
+        for i in range(m):
+            for j in range(m):
                 B[i, j] = A[i, :].dot(A[j, :])  # dotproduct(A[i], A[j], n)
         return Matrix(B)
-
 
     def introot(self, a, b, c, d):
         """
@@ -370,7 +368,6 @@ class Diophantine:
         assert int_answer == answer
         return int_answer
 
-
     def lnearint(self, a, b):
         """
         left nearest integer
@@ -387,16 +384,14 @@ class Diophantine:
             y = y + 1
         return y
 
-
     def ratior(self, a, b, c, d):
-        """ returns (a/b)/(c/d)"""
+        """returns (a/b)/(c/d)"""
         r = a * d
         s = b * c
         g = abs(gcd(r, s))
         if s < 0:
             g = -g
         return r / g, s / g
-
 
     def multr(self, a, b, c, d):
         # returns (a/b)(c/d)
@@ -405,13 +400,11 @@ class Diophantine:
         g = abs(gcd(r, s))
         return r / g, s / g
 
-
     def subr(self, a, b, c, d):
         t = a * d - b * c
         u = b * d
         g = abs(gcd(t, u))
         return t / g, u / g
-
 
     def addr(self, a, b, c, d):
         t = a * d + b * c
@@ -419,20 +412,18 @@ class Diophantine:
         g = abs(gcd(t, u))
         return t / g, u / g
 
-
     def comparer(self, a, b, c, d):
-        """Assumes b>0 and d>0.  Returns -1, 0 or 1 according as a/b <,=,> c/d+ """
+        """Assumes b>0 and d>0.  Returns -1, 0 or 1 according as a/b <,=,> c/d+"""
         assert b > 0 and d > 0
         return self.sign(a * d - b * c)
-
 
     def lcasvector(self, A, x):
         """lcv[j]=X[1]A[1, j]+...+X[m]A[m, j], 1 <= j <= n+"""
         # global lcv
-    #     printnp(x)
-    #     printnp(A)
+        #     printnp(x)
+        #     printnp(A)
         n = A.shape[1]
         lcv = zeros(n, 1)
-        for j in xrange(n):
+        for j in range(n):
             lcv[j] = x.dot(A[:, j])
         return lcv
