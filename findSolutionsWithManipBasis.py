@@ -177,20 +177,20 @@ if __name__ == "__main__":
     b = forced_neg_removal(a, b)
     start = time.time()
     sols = multiprocess_recurse_over_solution_path(a, b)
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
     start = time.time()
     sols = recurse_over_solution_path(a, b)
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
     start = time.time()
     sols = multiprocess_recurse_find_first([a], [b], covered=set())
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
     start = time.time()
     sols = recurse_find_first(a, b, covered=set())
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
 
 ################## Older code that uses a worse form of multiprocessing ############################
 #

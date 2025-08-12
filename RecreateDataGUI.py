@@ -44,7 +44,7 @@ class PossValsText(tk.Text):
         # if the variable has data in it, use it to initialize
         # the widget
         if self._min_val is not None and self._max_val is not None:
-            var_current = [str(n) for n in xrange(self._min_val.get(), self._max_val.get()+1)]
+            var_current = [str(n) for n in range(self._min_val.get(), self._max_val.get()+1)]
             self.insert("1.0", ', '.join(var_current))
 
         # this defines an internal proxy which generates a
@@ -93,7 +93,7 @@ class PossValsText(tk.Text):
         except ValueError:
             return
         current_poss = re.split('[,\s]+', self.get("1.0", "end-1c"))
-        var_current = [str(n) for n in xrange(self._min_val.get(), self._max_val.get()+1)]
+        var_current = [str(n) for n in range(self._min_val.get(), self._max_val.get()+1)]
         if current_poss != var_current:
             self.delete("1.0", "end")
             self.insert("1.0", ', '.join(var_current))
@@ -152,7 +152,7 @@ class CoreGUI(object):
         :return:
         '''
         if self.num_subjects.get() == 0:
-            print "Need to specify a \"Number of Subjects\" > 0"
+            print("Need to specify a \"Number of Subjects\" > 0")
             return
         self.start_button.config(text='Running...')
         self.start_button.config(command=None)
@@ -161,7 +161,7 @@ class CoreGUI(object):
         self.start_button.grid(row=15, columnspan=3, column=0)
         debug = bool(self.debug.get())
         if debug:
-            print "Starting Data Recreation..."
+            print("Starting Data Recreation...")
         var = eval(compile(self.variance.get(), '<string>', 'eval', __future__.division.compiler_flag))
         var_precision = abs(eval(compile(self.variance_precision.get(), '<string>', 'eval', __future__.division.compiler_flag)))
         if self.use_SD:
@@ -233,20 +233,20 @@ class CoreGUI(object):
         if len(self.rd.sols)>0:
             self.rd.getDataSimple()
             if debug:
-                print str(sum([len(x) for x in self.rd.simpleData.itervalues()])) + " unique solutions found."
+                print(str(sum([len(x) for x in self.rd.simpleData.itervalues()])) + " unique solutions found.")
                 index = 0
                 for params in self.rd.simpleData:
                     if index > 100:
                         break
-                    print "At mean, variance", params, ":"
+                    print("At mean, variance", params, ":")
                     for simpleSol in self.rd.simpleData[params]:
                         if index > 100:
                             break
                         index += 1
-                        print simpleSol
+                        print(simpleSol)
         else:
             if debug:
-                print str(len(self.rd.getDataSimple())) + " unique solutions found."
+                print(str(len(self.rd.getDataSimple())) + " unique solutions found.")
 
     def graph(self):
         self.rd.graphData()
@@ -471,7 +471,7 @@ class CoreGUI(object):
         :return:
         '''
         if self.debug.get():
-            print "Loading settings from " + settings_file_full_path
+            print("Loading settings from " + settings_file_full_path)
         self.settings_file = settings_file_full_path
         input_file = open(self.settings_file, 'rb')
         settings = cPickle.load(input_file)
@@ -495,7 +495,7 @@ class CoreGUI(object):
 
     def saveSettings(self, settings_file_full_path):
         if self.debug.get():
-            print "Saving settings to " + settings_file_full_path
+            print("Saving settings to " + settings_file_full_path)
         self.settings_file = settings_file_full_path
         settings_save_file = open(self.settings_file, 'wb')
         settings = RecreateDataGUISettings(self.debug.get(), self.min_score.get(), self.max_score.get(), self.poss_vals.get("1.0", "end-1c"), self.mean.get(), self.mean_precision.get(), self.variance.get(), self.variance_precision.get(), self.num_subjects.get(), self.forced_vals.get("1.0", "end-1c"), self.use_SD)
@@ -504,7 +504,7 @@ class CoreGUI(object):
 
     def saveModel(self, model_file_full_path):
         if self.debug.get():
-            print "Saving model to " + model_file_full_path
+            print("Saving model to " + model_file_full_path)
         self.model_file = model_file_full_path
         model_save_file = open(self.model_file, 'wb')
         cPickle.dump(self.rd, model_save_file)
@@ -512,7 +512,7 @@ class CoreGUI(object):
 
     def loadModel(self, model_file_full_path):
         if self.debug.get():
-            print "Loading model from " + model_file_full_path
+            print("Loading model from " + model_file_full_path)
 
         self.model_file = model_file_full_path
         model_read_file = open(self.model_file, 'rb')
@@ -525,7 +525,7 @@ class CoreGUI(object):
 
     def saveData(self, data_file_full_path):
         if self.debug.get():
-            print "Saving data to " + data_file_full_path
+            print("Saving data to " + data_file_full_path)
         self.data_file = data_file_full_path
         data_save_file = open(self.data_file, 'wb')
         if len(self.rd.sols) == 0:
@@ -577,9 +577,9 @@ class CoreGUI(object):
 def root_closer(root, directory_name=None):
     if directory_name:
         shutil.rmtree(directory_name)
-    for i in xrange(3):
+    for i in range(3):
         root.after(1,wrapped_partial(root_closer, root))
-    for i in xrange(20):
+    for i in range(20):
         root.quit()
 
 if __name__ == "__main__":
