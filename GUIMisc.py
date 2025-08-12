@@ -1,7 +1,7 @@
 __author__ = 'sean'
-from Tkinter import *
+from tkinter import *
 import math, traceback
-from tkFileDialog import askopenfilename, asksaveasfile
+from tkinter.filedialog import askopenfilename, asksaveasfile
 
 class FileLoader(Frame):
     def __init__(self, master, funcToPassTo):
@@ -102,7 +102,7 @@ def lambda_make_file_saver(frameEnvirons, frameName, fileSaverName, filenameFunc
 
 
 def fixed_callback(*args):
-    print args
+    print(args)
 
 def bindings(widget, seq):
     return [x for x in widget.bind(seq).splitlines() if x.strip()]
@@ -119,7 +119,7 @@ def remove_binding(widget, seq, index=None, funcid=None):
             widget.unbind(seq, _funcid(binding))
             b.remove(binding)
         except IndexError:
-            print 'Binding #%d not defined.' % index
+            print('Binding #%d not defined.' % index)
             return
 
     elif funcid:
@@ -131,10 +131,10 @@ def remove_binding(widget, seq, index=None, funcid=None):
                 widget.unbind(seq, funcid)
                 break
         if not binding:
-            print 'Binding "%s" not defined.' % funcid
+            print('Binding "%s" not defined.' % funcid)
             return
     else:
-        raise ValueError, 'No index or function id defined.'
+        raise ValueError('No index or function id defined.')
 
     for x in b:
         widget.bind(seq, '+'+x, 1)
@@ -156,10 +156,10 @@ def mouse_wheel(event, frame):
 
 def getTkinterLocation():
     """Returns the location of the Tkinter module."""
-    import Tkinter
-    if Tkinter.__file__.endswith('pyc'):
-        return Tkinter.__file__[:-1]
-    return Tkinter.__file__
+    import tkinter
+    if tkinter.__file__.endswith('pyc'):
+        return tkinter.__file__[:-1]
+    return tkinter.__file__
 
 
 def inTkinterMainloop():
@@ -229,7 +229,7 @@ class MenuItems(Frame):
 
     def addTopLevelMenuItem(self, menu, text, function, *params, **kwargs):
         menu.add_command(label=text, command=function)
-        if(kwargs.has_key("hotKey")):
+        if("hotKey" in kwargs):
             self.master.bind(kwargs["hotKey"],lambda event: function())
 
     def addQuit(self):

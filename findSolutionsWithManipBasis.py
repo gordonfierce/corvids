@@ -5,7 +5,7 @@ import multiprocessing as mp
 def forced_neg_removal(a,b):
 
     force_indices = {}
-    c = map(list, zip(*a))
+    c = list(map(list, list(zip(*a))))
     for indx, row in enumerate(c):
         # check if there's exactly one non-zero, and if the value of the non-zero is '1'
         if sum([1 for r in row if r!=0 ]) == 1 == sum(row):
@@ -177,20 +177,20 @@ if __name__ == "__main__":
     b = forced_neg_removal(a, b)
     start = time.time()
     sols = multiprocess_recurse_over_solution_path(a, b)
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
     start = time.time()
     sols = recurse_over_solution_path(a, b)
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
     start = time.time()
     sols = multiprocess_recurse_find_first([a], [b], covered=set())
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
     start = time.time()
     sols = recurse_find_first(a, b, covered=set())
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
 
 ################## Older code that uses a worse form of multiprocessing ############################
 #
