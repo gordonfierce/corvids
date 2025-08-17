@@ -1,32 +1,33 @@
-__author__ = 'Sean Wilner'
+__author__ = "Sean Wilner"
 from basisManipSolutions import *
 import multiprocessing as mp
 
-def forced_neg_removal(a,b):
 
+def forced_neg_removal(a, b):
     force_indices = {}
-    c = map(list, zip(*a))
+    c = list(map(list, list(zip(*a))))
     for indx, row in enumerate(c):
         # check if there's exactly one non-zero, and if the value of the non-zero is '1'
-        if sum([1 for r in row if r!=0 ]) == 1 == sum(row):
+        if sum([1 for r in row if r != 0]) == 1 == sum(row):
             force_indices[indx] = row.index(1)
-    for indx in  force_indices:
-        b = list_sum(b, list_mul(a[force_indices[indx]], -1*b[indx]))
+    for indx in force_indices:
+        b = list_sum(b, list_mul(a[force_indices[indx]], -1 * b[indx]))
     return b
 
-def dead_solution(a, b):
 
+def dead_solution(a, b):
     for indx, val in enumerate(b):
         if val >= 0:
             continue
-        if any([a_[indx]>0 for a_ in a]):
+        if any([a_[indx] > 0 for a_ in a]):
             continue
         return True
     return False
 
-def recurse_over_solution_path(a, b, covered = set()):
+
+def recurse_over_solution_path(a, b, covered=set()):
     sols = []
-    if len(set([indx for indx,b_ in enumerate(b) if b_<0])) == 0:
+    if len(set([indx for indx, b_ in enumerate(b) if b_ < 0])) == 0:
         sols.append(b)
 
     for a_indx, a_ in enumerate(a):
@@ -44,8 +45,7 @@ def recurse_over_solution_path(a, b, covered = set()):
 
 
 def recurse_find_first(a, b, covered=set()):
-
-    if len(set([indx for indx,b_ in enumerate(b) if b_<0])) == 0:
+    if len(set([indx for indx, b_ in enumerate(b) if b_ < 0])) == 0:
         fl_sol = [soft_round(float(v)) for v in b]
         if all([isinstance(x, int) for x in fl_sol]):
             return b
@@ -54,19 +54,22 @@ def recurse_find_first(a, b, covered=set()):
         if a_indx in covered:
             continue
         b_temp = list_sum(a_, b)
-        temp_neg =set([indx for indx,b_ in enumerate(b_temp) if b_<0])
+        temp_neg = set([indx for indx, b_ in enumerate(b_temp) if b_ < 0])
         if len(temp_neg) == 0:
             fl_sol = [soft_round(float(v)) for v in b_temp]
             if all([isinstance(x, int) for x in fl_sol]):
                 return b_temp
         if not dead_solution(a, b_temp):
-            sol = recurse_find_first(a, b_temp, covered=set(covered))#recurse_over_solution_path(a, b_temp, covered=set(covered))
+            sol = recurse_find_first(
+                a, b_temp, covered=set(covered)
+            )  # recurse_over_solution_path(a, b_temp, covered=set(covered))
             if sol:
                 fl_sol = [soft_round(float(v)) for v in sol]
                 if all([isinstance(x, int) for x in fl_sol]):
                     return sol
         covered.add(a_indx)
     return None
+
 
 def multiprocess_recurse_func(X):
     a, b, depth, covered = X
@@ -75,34 +78,36 @@ def multiprocess_recurse_func(X):
         if a_indx in covered:
             continue
         b_temp = list_sum(a_, b)
-        temp_neg =set([indx for indx,b_ in enumerate(b_temp) if b_<0])
+        temp_neg = set([indx for indx, b_ in enumerate(b_temp) if b_ < 0])
         if len(temp_neg) == 0:
             rets.append(b_temp)
         if not dead_solution(a, b):
             if depth == 0:
                 rets.append((a, b_temp, 5, set(covered)))
             else:
-                rets.extend(multiprocess_recurse_func((a , b_temp, depth-1, set(covered))))
+                rets.extend(
+                    multiprocess_recurse_func((a, b_temp, depth - 1, set(covered)))
+                )
         covered.add(a_indx)
-    return  rets
+    return rets
+
 
 def multiprocess_recurse_find_first(a, b, covered=set()):
-
     if isinstance(b, list):
-            for b_inst in b:
-                if len(set([indx for indx,b_ in enumerate(b_inst) if b_<0])) == 0:
-                    fl_sol = [soft_round(float(v)) for v in b_inst]
-                    if all([isinstance(x, int) for x in fl_sol]):
-                        return b_inst
+        for b_inst in b:
+            if len(set([indx for indx, b_ in enumerate(b_inst) if b_ < 0])) == 0:
+                fl_sol = [soft_round(float(v)) for v in b_inst]
+                if all([isinstance(x, int) for x in fl_sol]):
+                    return b_inst
     else:
-        if len(set([indx for indx,b_ in enumerate(b) if b_<0])) == 0:
+        if len(set([indx for indx, b_ in enumerate(b) if b_ < 0])) == 0:
             fl_sol = [soft_round(float(v)) for v in b]
             if all([isinstance(x, int) for x in fl_sol]):
                 return b
     pool = mp.Pool()
     runnables = []
     if isinstance(a, list) and isinstance(b, list):
-        for a_inst, b_inst in zip(a,b):
+        for a_inst, b_inst in zip(a, b):
             runnables.append((a_inst, b_inst, 5, set()))
     else:
         runnables = [(a, b, 5, set())]
@@ -121,10 +126,10 @@ def multiprocess_recurse_find_first(a, b, covered=set()):
                     runnables.append(ret)
     return None
 
-def multiprocess_recurse_over_solution_path(a, b, covered = set()):
 
+def multiprocess_recurse_over_solution_path(a, b, covered=set()):
     solution_list = []
-    if len(set([indx for indx,b_ in enumerate(b) if b_<0])) == 0:
+    if len(set([indx for indx, b_ in enumerate(b) if b_ < 0])) == 0:
         solution_list.append(b)
     pool = mp.Pool()
     runnables = [(a, b, 5, set())]
@@ -141,7 +146,6 @@ def multiprocess_recurse_over_solution_path(a, b, covered = set()):
 
 
 if __name__ == "__main__":
-
     import time
 
     # #Constructed Normal
@@ -160,7 +164,14 @@ if __name__ == "__main__":
     # a = Matrix([[-1, 2, -1, 1, -2, 1, 0], [0, -1, 2, 0, -2, 1, 0], [-1, 2, 0, -2, 1, 0, 0], [-1, 1, 1, 0, -1, -1, 1]])
     # b = Matrix([[9], [6], [3], [3], [-1], [0], [0]])
 
-    a = Matrix([[-1,  2, -1,  1, -2,  1, 0],[ 0, -1,  2,  0, -2,  1, 0],[-1,  2,  0, -2,  1,  0, 0],[-1,  1,  1,  0, -1, -1, 1]])
+    a = Matrix(
+        [
+            [-1, 2, -1, 1, -2, 1, 0],
+            [0, -1, 2, 0, -2, 1, 0],
+            [-1, 2, 0, -2, 1, 0, 0],
+            [-1, 1, 1, 0, -1, -1, 1],
+        ]
+    )
     b = Matrix([[0, 1, 2, 3, 1, 2, -1]])
 
     # a = Matrix([[-1, 1, 0, 1, -1, 0, 0, 1, -1, 0, -1, 1, 0, 0, 0, 0, 0], [0, 0, 1, -1, 0, 0, -1, 0, 1, 0, 0, 1, -1, 0, 0, 0, 0], [-1, 1, 0, 0, 1, 0, -1, 0, 0, -1, 1, 0, 0, 0, 0, 0, 0], [0, -1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, -1, 0, 1], [-1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, -1, 0, 1, 0], [-1, 1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 1, 0, 0], [0, -1, 0, 1, 1, 0, 0, -1, 0, 0, 0, 0, -1, 1, 0, 0, 0], [0, -1, 0, 1, 1, 0, 0, 0, -1, -1, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, -1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0, 0, 0], [-1, 1, 0, 0, 0, 0, 1, 0, 0, -1, -1, 0, 1, 0, 0, 0, 0], [0, -1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, -1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0, 0, 0, 0, 0], [-1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [-1, 1, 1, 0, -1, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
@@ -169,28 +180,27 @@ if __name__ == "__main__":
     # a = Matrix([[-1, 1, 0, 1, -1, 0, 0, 1, -1, 0, -1, 1, 0, 0, 0], [0, 0, 1, -1, 0, 0, -1, 0, 1, 0, 0, 1, -1, 0, 0], [-1, 1, 0, 0, 1, 0, -1, 0, 0, -1, 1, 0, 0, 0, 0], [-1, 1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 1], [0, -1, 0, 1, 1, 0, 0, -1, 0, 0, 0, 0, -1, 1, 0], [0, -1, 0, 1, 1, 0, 0, 0, -1, -1, 0, 1, 0, 0, 0], [0, 0, 0, 0, -1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0], [-1, 1, 0, 0, 0, 0, 1, 0, 0, -1, -1, 0, 1, 0, 0], [0, -1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0, 0, 0, 0], [0, 0, -1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0, 0, 0], [-1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0, 0, 0, 0, 0], [-1, 1, 1, 0, -1, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0]])
     # b = Matrix([[-1], [0], [0], [2], [1], [2], [2], [2], [2], [1], [1], [1], [0], [0], [-1]])
 
-
     # a = Matrix([[-1, 1, 0, 1, -1, 0, 0, 1, -1, 0, -1, 1, 0, 0, 0], [0, 0, 1, -1, 0, 0, -1, 0, 1, 0, 0, 1, -1, 0, 0], [-1, 1, 0, 0, 1, 0, -1, 0, 0, -1, 1, 0, 0, 0, 0], [-1, 1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 1], [0, -1, 0, 1, 1, 0, 0, -1, 0, 0, 0, 0, -1, 1, 0], [0, -1, 0, 1, 1, 0, 0, 0, -1, -1, 0, 1, 0, 0, 0], [0, 0, 0, 0, -1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0], [-1, 1, 0, 0, 0, 0, 1, 0, 0, -1, -1, 0, 1, 0, 0], [0, -1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0, 0, 0, 0], [0, 0, -1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0, 0, 0], [-1, 1, 0, 1, 0, -1, 0, -1, 1, 0, 0, 0, 0, 0, 0], [-1, 1, 1, 0, -1, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0]])
     # b = Matrix([[0], [0], [0], [1], [1], [1], [1], [3], [2], [2], [1], [1], [0], [0], [0]])
 
-    a,b = getManipBasis(a,b)
+    a, b = getManipBasis(a, b)
     b = forced_neg_removal(a, b)
     start = time.time()
     sols = multiprocess_recurse_over_solution_path(a, b)
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
     start = time.time()
     sols = recurse_over_solution_path(a, b)
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
     start = time.time()
     sols = multiprocess_recurse_find_first([a], [b], covered=set())
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
     start = time.time()
     sols = recurse_find_first(a, b, covered=set())
-    print sols
-    print time.time() - start
+    print(sols)
+    print(time.time() - start)
 
 ################## Older code that uses a worse form of multiprocessing ############################
 #
